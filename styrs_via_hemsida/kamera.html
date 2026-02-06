@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dammsugarhemsida</title>
+    <link rel="stylesheet" href="css/kamera.css">
+</head>
+<body>
+    <div id="background"></div>
+    <div id="wrapper">
+    <header>   
+        <h1>Välkommen till Dammsugarhemsidan</h1>
+    </header> 
+    <nav>
+        <a href="index.html">Hem</a>
+        <a href="kamera.html">Kamera</a>
+        <a href="kontakt.html">Kontakt</a>
+    </nav>
+    <main>
+        <h2>Här kan du kontrollera ditt dammsugarens arbetsprocess</h2>
+        <div class="slider">
+            <button id="kamera-btn">Starta Kamera</button>
+        </div>
+    
+        <div id="kamera-feed" style="margin-top:20px;">
+            <img id="live-image" src="" alt="Live kamera" style="max-width:100%; border:2px solid black;">
+        </div>
+    </main>
+    
+    <script>
+        const btn = document.getElementById('kamera-btn');
+        const liveImg = document.getElementById('live-image');
+        
+        let cameraRunning = false;
+        
+        btn.addEventListener('click', () => {
+            if(!cameraRunning){
+                liveImg.src = "http://192.168.0.59:5001/video_feed";  // Byt till din Pi IP
+                btn.textContent = "Stoppa Kamera";
+                cameraRunning = true;
+            } else {
+                liveImg.src = "";
+                btn.textContent = "Starta Kamera";
+                cameraRunning = false;
+            }
+        });
+        </script>
+        
+</body>
+</html>
