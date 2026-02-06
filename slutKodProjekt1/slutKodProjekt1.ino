@@ -1,8 +1,8 @@
 /*
 *Name: Robotdammsugare
 *Author: Filip Momot
-*Date:
-*Description: This project uses motors, sensors and raspberry pi zero W with a camera to find garbage.
+*Date: 2026-02-06
+* Description: This project uses motors, sensors, and a Raspberry Pi Zero W with a camera to detect garbage.
 */
 
 //Libraries
@@ -33,7 +33,7 @@
   int analogSensorPinRight = A1;
   unsigned long lastTime = 0;
 
-  String currentAction = "FRAM"; // vad den ska göra
+  String currentAction = "FRAM"; // what the robot is supposed to do
   unsigned long actionStartTime = 0; 
   const unsigned long turnTime = 150;
 
@@ -127,7 +127,7 @@ void hogerMotor() {
   digitalWrite(motorPins[2], HIGH);
   digitalWrite(motorPins[3], LOW);
 
-  analogWrite(ENLeft, 120);
+  analogWrite(ENLeft, 120); // this have a lower speed because we want it to turn right 
   analogWrite(ENRight, 200);
 }
 
@@ -156,9 +156,9 @@ void stopMotor() {
 
 //This function takes the data from the ultrasonic sensor
 int ultrasonic() {
-  delayMicroseconds(10); // lagom paus mellan pingar
+  delayMicroseconds(10); // this is needed to recheck each side, otherwise it would use the same data
 
-  int distans = sonar.ping_cm(); // pinga EN gång
+  int distans = sonar.ping_cm(); // ping one time
 
   Serial.print("Avstånd: ");
   Serial.print(distans);
@@ -218,7 +218,7 @@ void brushless() {
   static unsigned long lastUpdate = 0;
   unsigned long now = millis();
 
-  if (now - lastUpdate > 50) { 
+  if (now - lastUpdate > 50) { // this increases the motor speed gradually over time
     lastUpdate = now;
     if (speed < maxSpeed) {
       speed = speed + addSpeed;  
@@ -235,7 +235,7 @@ void servo() {
 
   myservo.write(hoger);
   delay(300);
-  int hogerDist = ultrasonic();
+  int hogerDist = ultrasonic(); //This function makes the servo move to check diffrent angles, otherwize it would use the same data as before
 
   myservo.write(vanster);
   delay(300);

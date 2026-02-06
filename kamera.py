@@ -10,7 +10,7 @@ cap = cv.VideoCapture(0)
 cap.set(cv.CAP_PROP_FRAME_WIDTH, 320)
 cap.set(cv.CAP_PROP_FRAME_HEIGHT, 240)
 
-kernel = np.ones((3,3), np.uint8) #stäker kanter och maskar
+kernel = np.ones((3,3), np.uint8) #stärker kanter och maskar
 
 last_cmd = ""
 
@@ -28,21 +28,21 @@ while True:
 
 
     h, w, _ = frame.shape
-    roi = frame[int(h*0.6):h, :] #roi står för region of interest, endast golv i det här fallet
+    roi = frame[int(h*0.6):h, :] #ROI stands for Region Of Interest, in this case, only the floor is analyzed, which helps separate objects from the floor.
     gray = cv.cvtColor(roi, cv.COLOR_BGR2GRAY)
     blur = cv.GaussianBlur(gray, (5,5), 0)
 
     kant = cv.Canny(blur, 60, 120)
-    hsv = cv.cvtColor(roi, cv.COLOR_BGR2HSV) #fråga Huke om man ska använda HSV eller om LAB är bättre
+    hsv = cv.cvtColor(roi, cv.COLOR_BGR2HSV) # HSV is used for color detection, LAB could also be used, but it works slightly differently.
     color_mask = cv.inRange(hsv, np.array([0, 40, 40]), np.array([180, 255, 255]))
 
     combined = cv.bitwise_and(kant, color_mask)
     kernel = np.ones((3,3), np.uint8)
     combined = cv.dilate(combined, kernel, iterations=1)
 
-    contours, _ = cv.findContours(combined, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE) #lista med hittade objekt
+    contours, _ = cv.findContours(combined, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE) # List of detected objects
     
-    objekt = [] #här är våran lista med alla objekt som dekteras 
+    objekt = [] # Empty list that stores all detected objects
     for cnt in contours:
         area = cv.contourArea(cnt)
         if 50 < area < 1000:
@@ -51,14 +51,15 @@ while True:
             cv.rectangle(roi, (x,y), (x+w,y+h), (0,0,255), 2)
             cv.putText(roi, "SKRÄP", (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 0.4,(0,0,255), 1)
 
-    # Här väljer vi första objektet i listan som "mål" så att den inte försöker ta sig till alla föremål samtidigt
+    #Select the first object in the list as the "target", so the robot does not try to move toward multiple objects at once
     if objekt:
         target = objekt[0]
         x, y, w, h = cv.boundingRect(target)
         cx = x + w // 2
 
         img_center = roi.shape[1] // 2
-        # Enkel styrlogik: sväng mot skräpet
+        # Simple steering logic:
+        # Turn toward the trash: forward, right, or left
         if cx < img_center - 20:
             send_cmd("VÄNSTER")
         elif cx > img_center + 20:
@@ -66,7 +67,7 @@ while True:
         else:
             send_cmd("FRAM")
     else:
-        # Inget skräp syns
+        # No trash ahead
         send_cmd("FRAM")
 
     cv.imshow('mask', combined)
@@ -78,6 +79,3 @@ while True:
         break
 cap.release()
 cv.destroyAllWindows()
-
-
-#Det du kan göra är att den väljer ett objekt/skräp i taget så att den åker först till ena skräpet
